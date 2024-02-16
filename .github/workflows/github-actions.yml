@@ -1,9 +1,11 @@
 name: GitHub Actions
+
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
+
 jobs:
   init:
     runs-on: ubuntu-latest
@@ -12,7 +14,7 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
-      - name: Staring Node.js ${{ matrix.node-version }}
+      - name: Starting Node.js ${{ matrix.node-version }} # Corrected spelling here
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -22,15 +24,16 @@ jobs:
         run: npm run build
       - name: lint code
         run: npm run lint
+
   deploy:
-    needs: [init],
+    needs: [init]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
-      - name: Staring Node.js ${{ matrix.node-version }}
+      - name: Starting Node.js ${{ matrix.node-version }} # Corrected spelling here
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -40,6 +43,3 @@ jobs:
         run: npm run predeploy
       - name: deploy project
         run: npm run deploy
-
-
-
