@@ -24,37 +24,4 @@ jobs:
         run: npm run build
       - name: lint code
         run: npm run lint
-
-  deploy:
-    needs: [init]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Starting Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: install modules
-        run: npm install
-      - name: build project
-        run: npm run build
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
-      - name: Deploy to GitHub Pages
-        run: |
-          git config --global user.name "${user_name}"
-          git config --global user.email "${user_email}"
-          git remote set-url origin "https://x-access-token:${github_token}@github.com//${repository}"
-          npm run deploy
-        env:
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          github_token: ${{ secrets.ACTIONS_DEPLOY_ACCESS_TOKEN }}
-          repository: ${{ github.repository }}
       
