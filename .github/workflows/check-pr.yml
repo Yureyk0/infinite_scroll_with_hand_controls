@@ -1,4 +1,4 @@
-name: GitHub Actions
+name: check-pr
 
 on:
   pull_request:
