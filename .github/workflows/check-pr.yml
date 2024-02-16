@@ -1,13 +1,10 @@
 name: GitHub Actions
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
-  init:
+  check-pr:
     runs-on: ubuntu-latest
     strategy:
       matrix:
