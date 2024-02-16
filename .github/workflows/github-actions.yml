@@ -37,14 +37,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: install modules
+        run: npm install
+      - name: build project
+        run: npm run build
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
-      
-      - name: install modules
-        run: npm install
       - name: Deploy to GitHub Pages
         run: |
           git config --global user.name "${user_name}"
