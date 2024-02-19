@@ -1,15 +1,19 @@
 import { Oval } from "react-loader-spinner";
 import "./loader.css";
-import { Dispatch, RefObject, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
+import useOnScreen from "../../hooks/useOnScreen";
 
 const Loader = ({
-  refLoader,
+  setIsVisible,
 }: {
-  setPage: Dispatch<SetStateAction<number>>;
-  refLoader: RefObject<HTMLDivElement>;
+  setIsVisible: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isVisible = useOnScreen(ref);
+  setIsVisible(isVisible);
+
   return (
-    <div id="loader-photos" ref={refLoader}>
+    <div id="loader-photos" ref={ref}>
       <Oval
         visible={true}
         height="80"
