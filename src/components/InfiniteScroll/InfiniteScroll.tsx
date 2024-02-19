@@ -6,7 +6,11 @@ import "./InfiniteScroll.css";
 function InfiniteScroll() {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const pageSize = 4;
-  const { data, error, isLoading, fetchNextPage } = usePhotos({ pageSize });
+  const { data, error, isLoading, fetchNextPage } = usePhotos(
+    { pageSize },
+    setIsVisible,
+  );
+
   useEffect(() => {
     if (isVisible) {
       fetchNextPage();
@@ -25,7 +29,7 @@ function InfiniteScroll() {
           ))}
         </div>
       ))}
-      <Loader setIsVisible={setIsVisible} />
+      {!isLoading && <Loader setIsVisible={setIsVisible} />}
     </div>
   );
 }

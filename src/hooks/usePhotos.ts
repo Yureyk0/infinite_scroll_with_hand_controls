@@ -1,28 +1,32 @@
-import axios from "axios";
 import { useInfiniteQuery } from "react-query";
-import { ACCESS_TOKEN, BASE_URL, PHOTO_PAGE_URL } from "../constants/constants";
+import { PHOTO_PAGE_URL } from "../constants/constants";
 import { Photo } from "../types/photo";
+import { Dispatch, SetStateAction } from "react";
+import apiClient from "../services/apiClient";
 
 interface PhotosQuery {
   pageSize: number;
 }
 
-const usePhotos = (query: PhotosQuery) =>
+const usePhotos = (
+  query: PhotosQuery,
+  setVisable: Dispatch<SetStateAction<boolean>>,
+) =>
   useInfiniteQuery<Photo[], Error>({
-    queryKey: ["photo", query],
+    queryKey: ["photo", query.pageSize],
 
     queryFn: ({ pageParam = 1 }) =>
-      axios
-        .get(BASE_URL + PHOTO_PAGE_URL, {
-          headers: {
-            "Content-type": "application/json",
-            Authorization: ACCESS_TOKEN,
-          },
+      apiClient
+        .get(PHOTO_PAGE_URL, {
           params: {
             page: pageParam,
           },
         })
-        .then((res) => res.data),
+        .then((res) => {
+          setVisable(false);
+
+          return res.data;
+        }),
 
     getNextPageParam(lastPage, allPages) {
       return lastPage.length > 0 ? allPages.length + 1 : undefined;
