@@ -1,22 +1,33 @@
-import { RefObject, useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useCallback } from "react";
+import { FetchNextPageOptions, InfiniteQueryObserverResult } from "react-query";
+import { Photo } from "../types/photo";
 
-export default function useOnScreen(ref: RefObject<HTMLElement>) {
-  const [isIntersecting, setIntersecting] = useState(false);
+export function useOnScreen({
+  isLoading,
+  fetchNextPage,
+  intObserver,
+}: {
+  isLoading: boolean;
+  fetchNextPage: (
+    options?: FetchNextPageOptions,
+  ) => Promise<InfiniteQueryObserverResult<Photo[], Error>>;
+  intObserver: MutableRefObject<IntersectionObserver | null>;
+}) {
+  const secondLastLIRef = useCallback(
+    (item: HTMLLIElement | null) => {
+      if (isLoading) return;
 
-  const observer = useMemo(
-    () =>
-      new IntersectionObserver(([entry]) =>
-        setIntersecting(entry.isIntersecting),
-      ),
-    [],
+      if (intObserver.current) intObserver.current.disconnect();
+
+      intObserver.current = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          fetchNextPage();
+        }
+      });
+
+      if (item) intObserver.current.observe(item);
+    },
+    [isLoading, intObserver, fetchNextPage],
   );
-
-  useEffect(() => {
-    if (ref.current === null) return;
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [observer, ref]);
-
-  return isIntersecting;
+  return secondLastLIRef;
 }

@@ -1,37 +1,45 @@
-import { useEffect, useState } from "react";
-import usePhotos from "../../hooks/usePhotos";
-import Loader from "../Loader/Loader";
+import { useRef } from "react";
+import { usePhotos } from "../../hooks/usePhotos";
+import { Loader } from "../Loader/Loader";
 import "./InfiniteScroll.css";
+import { useOnScreen } from "../../hooks/useOnScreen";
 
-function InfiniteScroll() {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+export function InfiniteScroll() {
   const pageSize = 4;
-  const { data, error, isLoading, fetchNextPage } = usePhotos(
-    { pageSize },
-    setIsVisible,
-  );
+  const { data, error, isLoading, fetchNextPage } = usePhotos({ pageSize });
+  const intObserver = useRef<IntersectionObserver | null>(null);
 
-  useEffect(() => {
-    if (isVisible) {
-      fetchNextPage();
-    }
-  }, [fetchNextPage, isVisible]);
+  const secondLastLIRef = useOnScreen({
+    isLoading,
+    fetchNextPage,
+    intObserver,
+  });
 
-  if (isLoading) return <div>Loading.....!</div>;
+  if (isLoading) return <Loader />;
   if (error) return <div>{error.message}</div>;
 
   return (
     <div>
-      {data?.pages.map((page, index) => (
-        <div key={index} className="page-container">
-          {page.map((photo) => (
-            <img src={photo.urls.regular} key={photo.id} height={100} />
+      {data?.pages.map((page, pageIndex) => (
+        <ul key={pageIndex} className="page-container">
+          {page.map((photo, photoIndex) => (
+            <li
+              key={photo.id}
+              ref={
+                data.pages.length - 1 === pageIndex &&
+                page.length - 1 === photoIndex
+                  ? secondLastLIRef
+                  : null
+              }
+            >
+              <img src={photo.urls.regular} height={100} />
+            </li>
           ))}
-        </div>
+        </ul>
       ))}
-      {!isLoading && <Loader setIsVisible={setIsVisible} />}
+      <div>
+        <Loader />
+      </div>
     </div>
   );
 }
-
-export default InfiniteScroll;

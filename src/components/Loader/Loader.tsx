@@ -1,22 +1,9 @@
 import { Oval } from "react-loader-spinner";
 import "./loader.css";
-import { Dispatch, SetStateAction, useRef, useEffect } from "react";
-import useOnScreen from "../../hooks/useOnScreen";
 
-const Loader = ({
-  setIsVisible,
-}: {
-  setIsVisible: Dispatch<SetStateAction<boolean>>;
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isVisible = useOnScreen(ref);
-
-  useEffect(() => {
-    setIsVisible(isVisible);
-  }, [isVisible, setIsVisible]);
-
+export const Loader = () => {
   return (
-    <div id="loader-photos" ref={ref}>
+    <div id="loader-photos">
       <Oval
         visible={true}
         height="80"
@@ -30,5 +17,3 @@ const Loader = ({
     </div>
   );
 };
-
-export default Loader;
