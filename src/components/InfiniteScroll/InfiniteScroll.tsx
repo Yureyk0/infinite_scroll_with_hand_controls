@@ -5,16 +5,12 @@ import "./InfiniteScroll.css";
 
 interface InfiniteScrollProps {
   fetchNextPage: () => void;
-  isFetchingNextPage: boolean;
   isLoading: boolean;
-  error: Error | null;
   children: ReactNode;
 }
 
 export function InfiniteScroll({
-  error,
   isLoading,
-  isFetchingNextPage,
   fetchNextPage,
   children,
 }: InfiniteScrollProps) {
@@ -22,13 +18,9 @@ export function InfiniteScroll({
 
   useIntersectionObserverAndFetch({
     fetchNextPage,
-    isFetchingNextPage,
     isLoading,
     triggerRef,
   });
-
-  if (isLoading) return <Loader />;
-  if (error) return <div>{error.message}</div>;
 
   return (
     <div className="page-container">

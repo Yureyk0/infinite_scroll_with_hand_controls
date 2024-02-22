@@ -2,36 +2,32 @@ import { useEffect, MutableRefObject } from "react";
 
 interface UseIntersectionObserverProps {
   fetchNextPage: () => void;
-  isFetchingNextPage: boolean;
   isLoading: boolean;
   triggerRef: MutableRefObject<HTMLElement | null>;
 }
 
 export const useIntersectionObserverAndFetch = ({
   fetchNextPage,
-  isFetchingNextPage,
   isLoading,
   triggerRef,
 }: UseIntersectionObserverProps): void => {
   useEffect(() => {
+    if (!triggerRef.current) return;
+
     const observer = new IntersectionObserver(
       ([entries]) => {
         if (isLoading) return;
-        if (entries.isIntersecting && !isFetchingNextPage) {
+        if (entries.isIntersecting) {
           fetchNextPage();
         }
       },
-      { threshold: 1.0 },
+      { threshold: 0.1 },
     );
 
-    if (triggerRef.current) {
-      observer.observe(triggerRef.current);
-    }
+    observer.observe(triggerRef.current);
 
     return () => {
-      if (triggerRef) {
-        observer.disconnect();
-      }
+      observer.disconnect();
     };
-  }, [fetchNextPage, isFetchingNextPage, isLoading, triggerRef]);
+  }, [fetchNextPage, isLoading, triggerRef]);
 };
