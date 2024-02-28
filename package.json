@@ -13,10 +13,13 @@
     "deploy": "gh-pages -d build"
   },
   "dependencies": {
-    "@tensorflow-models/hand-pose-detection": "^2.0.1",
-    "@tensorflow/tfjs": "^4.17.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.17.0",
-    "@tensorflow/tfjs-core": "^4.17.0",
+    "@mediapipe/hands": "~0.4.0",
+    "@tensorflow-models/hand-pose-detection": "file:../../dist",
+    "@tensorflow/tfjs-backend-wasm": "^4.9.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.9.0",
+    "@tensorflow/tfjs-converter": "^4.9.0",
+    "@tensorflow/tfjs-core": "^4.9.0",
+    "scatter-gl": "0.0.8",
     "axios": "^1.6.7",
     "pre-commit": "^1.2.2",
     "react": "^18.2.0",

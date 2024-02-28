@@ -3,7 +3,6 @@ import { usePhotos } from "../../hooks/usePhotos";
 import { useState } from "react";
 
 import "./Home.css";
-import { Cam, CamWrapper } from "../../components/Cam";
 import { HandPoseDetection } from "../../components/model/HandPoseDetection";
 
 export function Home() {
@@ -18,11 +17,7 @@ export function Home() {
   return (
     <div className="container">
       <div>
-        {/* <WebCam webcamRef={webcamRef} canvasRef={canvasRef} /> */}
-        <CamWrapper>
-          <Cam />
-          <HandPoseDetection />
-        </CamWrapper>
+        <HandPoseDetection />
         <button onClick={() => setCaptureEnable((prevState) => !prevState)}>
           {isCaptureEnable ? "stop" : "start"}
         </button>
