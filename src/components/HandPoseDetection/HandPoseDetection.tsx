@@ -1,10 +1,18 @@
-import { useCallback, useEffect, useRef } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import {
   createDetector,
   SupportedModels,
   HandDetector,
 } from "@tensorflow-models/hand-pose-detection";
 import Webcam from "react-webcam";
+import { MODEL_CONFIG } from "../../constants/constants";
+import "./HandPoseDetection.css";
 
 const MODEL = SupportedModels.MediaPipeHands;
 
@@ -16,7 +24,11 @@ const FINGER_JOINTS = [
   [0, 17, 18, 19, 20],
 ];
 
-export const HandPoseDetection = () => {
+export const HandPoseDetection = ({
+  setCoefficient,
+}: {
+  setCoefficient: Dispatch<SetStateAction<number | null>>;
+}) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -46,8 +58,20 @@ export const HandPoseDetection = () => {
       canvasRef.current.height = videoHeight;
 
       const detections = await model.estimateHands(video);
-
+      if (!detections) {
+        setCoefficient(null);
+        return;
+      }
       detections.forEach((detection) => {
+        if (detection?.keypoints[0].y < detection?.keypoints[4].y) {
+          setCoefficient(
+            1 - detection?.keypoints[0].y / detection?.keypoints[4].y,
+          );
+        } else {
+          setCoefficient(
+            detection?.keypoints[4].y / detection?.keypoints[0].y - 1,
+          );
+        }
         FINGER_JOINTS.forEach((joint) => {
           ctx.beginPath();
           joint.forEach((idx) => {
@@ -80,53 +104,30 @@ export const HandPoseDetection = () => {
         });
       });
     },
-    [webcamRef],
+    [setCoefficient],
   );
-
   useEffect(() => {
-    async function runHandpose() {
-      const loadModel = await createDetector(MODEL, {
-        runtime: "mediapipe",
-        solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
-        modelType: "full",
-      });
+    let intervalId: NodeJS.Timeout;
 
-      setInterval(() => {
+    async function runHandpose() {
+      const loadModel = await createDetector(MODEL, MODEL_CONFIG);
+
+      intervalId = setInterval(() => {
         detect(loadModel);
       }, 10);
     }
+
     runHandpose();
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [detect]);
 
   return (
-    <div>
-      <Webcam
-        ref={webcamRef}
-        mirrored
-        style={{
-          position: "absolute",
-          marginLeft: "auto",
-          marginRight: "auto",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          width: 640,
-          height: 480,
-        }}
-      />
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: "absolute",
-          marginLeft: "auto",
-          marginRight: "auto",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          width: 640,
-          height: 480,
-        }}
-      />
+    <div className="camera_container">
+      <Webcam ref={webcamRef} mirrored className="position" />
+      <canvas ref={canvasRef} className="position" />
     </div>
   );
 };
