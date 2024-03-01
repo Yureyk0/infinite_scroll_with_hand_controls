@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import {
   createDetector,
@@ -32,6 +33,9 @@ export const HandPoseDetection = ({
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const [handDetector, setHandDetector] = useState<HandDetector>();
+  const createDetectorPromiseRef = useRef<Promise<HandDetector>>();
+
   const detect = useCallback(
     async (model: HandDetector) => {
       if (!canvasRef.current) return;
@@ -48,11 +52,10 @@ export const HandPoseDetection = ({
         return;
 
       const video = webcamRef.current.video;
-      const videoWidth = webcamRef.current.video.videoWidth;
-      const videoHeight = webcamRef.current.video.videoHeight;
+      const { videoWidth, videoHeight } = video;
 
-      webcamRef.current.video.width = videoWidth;
-      webcamRef.current.video.height = videoHeight;
+      video.width = videoWidth;
+      video.height = videoHeight;
 
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
@@ -62,24 +65,20 @@ export const HandPoseDetection = ({
         setCoefficient(null);
         return;
       }
-      detections.forEach((detection) => {
-        if (detection?.keypoints[0].y < detection?.keypoints[4].y) {
-          setCoefficient(
-            1 - detection?.keypoints[0].y / detection?.keypoints[4].y,
-          );
+      detections.forEach(({ keypoints, handedness }) => {
+        if (keypoints[0].y < keypoints[4].y) {
+          setCoefficient(1 - keypoints[0].y / keypoints[4].y);
         } else {
-          setCoefficient(
-            detection?.keypoints[4].y / detection?.keypoints[0].y - 1,
-          );
+          setCoefficient(keypoints[4].y / keypoints[0].y - 1);
         }
         FINGER_JOINTS.forEach((joint) => {
           ctx.beginPath();
           joint.forEach((idx) => {
             const x = webcamRef.current
-              ? video.videoWidth - detection.keypoints[idx].x
-              : detection.keypoints[idx].x;
+              ? video.videoWidth - keypoints[idx].x
+              : keypoints[idx].x;
 
-            const y = detection.keypoints[idx].y;
+            const y = keypoints[idx].y;
 
             if (idx === 0) ctx.moveTo(x, y);
             else ctx.lineTo(x, y);
@@ -89,9 +88,9 @@ export const HandPoseDetection = ({
           ctx.stroke();
         });
 
-        const color = detection.handedness === "Left" ? "blue" : "red";
+        const color = handedness === "Left" ? "blue" : "red";
 
-        detection.keypoints.forEach((keypoint) => {
+        keypoints.forEach((keypoint) => {
           const x = webcamRef.current
             ? video.videoWidth - keypoint.x
             : keypoint.x;
@@ -106,23 +105,28 @@ export const HandPoseDetection = ({
     },
     [setCoefficient],
   );
+
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    if (createDetectorPromiseRef.current) return;
 
-    async function runHandpose() {
-      const loadModel = await createDetector(MODEL, MODEL_CONFIG);
+    (async () => {
+      const promise = createDetector(MODEL, MODEL_CONFIG);
+      createDetectorPromiseRef.current = promise;
+      setHandDetector(await promise);
+    })();
+  });
 
-      intervalId = setInterval(() => {
-        detect(loadModel);
-      }, 10);
-    }
+  useEffect(() => {
+    if (!handDetector) return;
 
-    runHandpose();
+    const intervalId = setInterval(() => {
+      detect(handDetector);
+    }, 10);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [detect]);
+  }, [detect, handDetector]);
 
   return (
     <div className="camera_container">
