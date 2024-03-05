@@ -6,21 +6,20 @@ import {
 } from "@tensorflow-models/hand-pose-detection";
 import { MODEL_CONFIG } from "../../constants/constants";
 import "./HandPoseDetection.css";
-import { useUserMedia } from "../../hooks/useUserMedia";
 
 const MODEL = SupportedModels.MediaPipeHands;
 export const HandPoseDetection = ({
   onThumbs: onHand,
+  stream,
 }: {
   onThumbs: (coefficient: number) => void;
+  stream: MediaStream | null;
 }) => {
   const webcamRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [handDetector, setHandDetector] = useState<HandDetector>();
   const createDetectorStarted = useRef(false);
-
-  const { stream } = useUserMedia({ video: true });
 
   useEffect(() => {
     const setupStream = () => {
