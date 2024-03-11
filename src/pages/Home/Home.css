@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 .webcam {
   position: sticky;
@@ -9,4 +9,8 @@
   right: 0;
   width: 640;
   height: 480;
+}
+.photo-size {
+  width: 150px;
+  height: auto;
 }

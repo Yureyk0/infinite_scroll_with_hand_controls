@@ -1,10 +1,11 @@
+import { useUserMedia } from "../../hooks/useUserMedia";
+import { useMemo } from "react";
+
 import { InfiniteScroll } from "../../components/InfiniteScroll/InfiniteScroll";
 import { usePhotos } from "../../hooks/usePhotos";
 import { HandPoseDetection } from "../../components/HandPoseDetection/HandPoseDetection";
 
 import "./Home.css";
-import { useUserMedia } from "../../hooks/useUserMedia";
-import { useMemo } from "react";
 
 export function Home() {
   const pageSize = 4;
@@ -46,7 +47,11 @@ export function Home() {
         {photos?.pages.map((page) =>
           page.map((photo) => (
             <div key={photo.id}>
-              <img src={photo.urls.regular} alt={photo.id} height={100} />
+              <img
+                src={photo.urls.regular}
+                alt={photo.id}
+                className="photo-size"
+              />
             </div>
           )),
         )}
